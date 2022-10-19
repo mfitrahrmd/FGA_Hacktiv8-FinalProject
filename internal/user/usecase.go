@@ -11,8 +11,9 @@ import (
 )
 
 type TokenPayload struct {
-	Id    string `json:"id"`
-	Email string `json:"email"`
+	Id       uint   `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
 }
 
 type userUsecase struct {
@@ -25,7 +26,7 @@ func NewUserUsecase(userRepository domain.UserRepository) *userUsecase {
 	}
 }
 
-func (u userUsecase) isUserUnique(ctx context.Context, user *domain.User, userId ...string) (bool, error) {
+func (u userUsecase) isUserUnique(ctx context.Context, user *domain.User, userId ...uint) (bool, error) {
 	foundwithEmail, errwithEmail := u.UserRepository.FindOneByEmail(ctx, &user.Email)
 	if errwithEmail != nil && !errors.Is(errwithEmail, gorm.ErrRecordNotFound) {
 		return false, errwithEmail
@@ -54,12 +55,7 @@ func (u userUsecase) Register(ctx context.Context, user *domain.User) (*domain.U
 		return nil, NewUserError(EMAIL_OR_USERNAME_ALREADY_EXIST)
 	}
 
-	err := u.UserRepository.InsertOne(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-
-	registeredUser, err := u.UserRepository.FindOneByEmail(ctx, &user.Email)
+	registeredUser, err := u.UserRepository.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +79,7 @@ func (u userUsecase) Login(ctx context.Context, user *domain.User) (string, erro
 	}
 
 	// generate token
-	token, err := infra_jwt.GenerateToken(env.JWT_KEY, TokenPayload{foundUser.Id, foundUser.Email})
+	token, err := infra_jwt.GenerateToken(env.JWT_KEY, TokenPayload{foundUser.Id, foundUser.Email, foundUser.Username})
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +87,7 @@ func (u userUsecase) Login(ctx context.Context, user *domain.User) (string, erro
 	return token, nil
 }
 
-func (u userUsecase) UpdateData(ctx context.Context, userId *string, newDataUser *domain.User) (*domain.User, error) {
+func (u userUsecase) UpdateData(ctx context.Context, userId *uint, newDataUser *domain.User) (*domain.User, error) {
 	_, err := u.UserRepository.FindOneById(ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -109,12 +105,7 @@ func (u userUsecase) UpdateData(ctx context.Context, userId *string, newDataUser
 		return nil, NewUserError(EMAIL_OR_USERNAME_ALREADY_EXIST)
 	}
 
-	err = u.UserRepository.UpdateOneById(ctx, userId, newDataUser)
-	if err != nil {
-		return nil, err
-	}
-
-	updatedUser, err := u.UserRepository.FindOneById(ctx, userId)
+	updatedUser, err := u.UserRepository.UpdateOneById(ctx, userId, newDataUser)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +113,8 @@ func (u userUsecase) UpdateData(ctx context.Context, userId *string, newDataUser
 	return updatedUser, nil
 }
 
-func (u userUsecase) Delete(ctx context.Context, userId *string) (*domain.User, error) {
-	foundUser, err := u.UserRepository.FindOneById(ctx, userId)
+func (u userUsecase) Delete(ctx context.Context, userId *uint) (*domain.User, error) {
+	_, err := u.UserRepository.FindOneById(ctx, userId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, NewUserError(USER_NOT_FOUND)
@@ -131,10 +122,10 @@ func (u userUsecase) Delete(ctx context.Context, userId *string) (*domain.User, 
 		return nil, err
 	}
 
-	err = u.UserRepository.DeleteOneById(ctx, userId)
+	deletedUser, err := u.UserRepository.DeleteOneById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return foundUser, nil
+	return deletedUser, nil
 }

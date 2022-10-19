@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type photoRepository struct {
@@ -16,36 +17,50 @@ func NewPhotoRepository(db *gorm.DB) *photoRepository {
 	}
 }
 
-func (p photoRepository) FindAll(ctx context.Context) (*[]domain.Photo, error) {
-	var result *[]domain.Photo
+func (p photoRepository) FindOneById(ctx context.Context, id *uint) (*domain.Photo, error) {
+	var result domain.Photo
 
-	if err := p.gorm.Debug().Find(result).Error; err != nil {
+	if err := p.gorm.Debug().Model(&domain.Photo{}).Where("id = ?", *id).First(&result).Error; err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
-func (p photoRepository) InsertOne(ctx context.Context, photo *domain.Photo) error {
+func (p photoRepository) FindALlByUserId(ctx context.Context, userId *uint) (*[]domain.Photo, error) {
+	var result []domain.Photo
+
+	if err := p.gorm.Debug().Model(&domain.Photo{}).Where("user_id = ?", *userId).Find(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (p photoRepository) InsertOne(ctx context.Context, photo *domain.Photo) (*domain.Photo, error) {
 	if err := p.gorm.Debug().Model(&domain.Photo{}).Save(photo).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return photo, nil
 }
 
-func (p photoRepository) UpdateOneById(ctx context.Context, id *string, photo *domain.Photo) error {
-	if err := p.gorm.Debug().Model(&domain.Photo{}).Where("id = ?", *id).Updates(photo).Error; err != nil {
-		return err
+func (p photoRepository) UpdateOneById(ctx context.Context, id *uint, photo *domain.Photo) (*domain.Photo, error) {
+	var photoModel domain.Photo
+
+	if err := p.gorm.Debug().Model(&photoModel).Clauses(clause.Returning{}).Where("id = ?", *id).Updates(photo).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &photoModel, nil
 }
 
-func (p photoRepository) DeleteOneById(ctx context.Context, id *string) error {
-	if err := p.gorm.Debug().Model(&domain.Photo{}).Where("id = ?", *id).Delete(&domain.Photo{}).Error; err != nil {
-		return err
+func (p photoRepository) DeleteOneById(ctx context.Context, id *uint) (*domain.Photo, error) {
+	var photoModel domain.Photo
+
+	if err := p.gorm.Debug().Model(&domain.Photo{}).Clauses(clause.Returning{}).Where("id = ?", *id).Delete(&photoModel).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &photoModel, nil
 }

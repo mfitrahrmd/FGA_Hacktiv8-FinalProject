@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type userRepository struct {
@@ -16,7 +17,7 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	}
 }
 
-func (u userRepository) FindOneById(ctx context.Context, id *string) (*domain.User, error) {
+func (u userRepository) FindOneById(ctx context.Context, id *uint) (*domain.User, error) {
 	var result *domain.User
 
 	if err := u.gorm.Debug().Model(&domain.User{}).Where("id = ?", *id).First(&result).Error; err != nil {
@@ -46,26 +47,30 @@ func (u userRepository) FindOneByUsername(ctx context.Context, username *string)
 	return result, nil
 }
 
-func (u userRepository) InsertOne(ctx context.Context, user *domain.User) error {
+func (u userRepository) InsertOne(ctx context.Context, user *domain.User) (*domain.User, error) {
 	if err := u.gorm.Debug().Model(&domain.User{}).Save(user).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return user, nil
 }
 
-func (u userRepository) UpdateOneById(ctx context.Context, id *string, user *domain.User) error {
-	if err := u.gorm.Debug().Model(&domain.User{}).Where("id = ?", *id).Updates(user).Error; err != nil {
-		return err
+func (u userRepository) UpdateOneById(ctx context.Context, id *uint, user *domain.User) (*domain.User, error) {
+	var userModel domain.User
+
+	if err := u.gorm.Debug().Model(&userModel).Clauses(clause.Returning{}).Where("id = ?", *id).Updates(user).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &userModel, nil
 }
 
-func (u userRepository) DeleteOneById(ctx context.Context, id *string) error {
-	if err := u.gorm.Debug().Model(&domain.User{}).Where("id = ?", id).Delete(&domain.User{}).Error; err != nil {
-		return err
+func (u userRepository) DeleteOneById(ctx context.Context, id *uint) (*domain.User, error) {
+	var userModel domain.User
+
+	if err := u.gorm.Debug().Model(&domain.User{}).Clauses(clause.Returning{}).Where("id = ?", id).Delete(&userModel).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &userModel, nil
 }
