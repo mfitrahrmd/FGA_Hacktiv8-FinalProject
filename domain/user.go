@@ -2,20 +2,23 @@ package domain
 
 import (
 	"context"
-	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/infrastructure/infra_crypto"
+	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/helper/helper_crypto"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	Base
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Password string  `json:"password"`
-	Age      int     `json:"age"`
-	Photos   []Photo `json:"photos"`
+	Username    string       `json:"username,omitempty"`
+	Email       string       `json:"email,omitempty"`
+	Password    string       `json:"-"`
+	Age         int          `json:"age,omitempty"`
+	Photo       *Photo       `json:"photo,omitempty"`
+	Comments    []Comment    `json:"comments,omitempty"`
+	SocialMedia *SocialMedia `json:"social_media,omitempty"`
 }
 
 type UserRepository interface {
+	FindAll(ctx context.Context) (*[]User, error)
 	FindOneById(ctx context.Context, id *uint) (*User, error)
 	FindOneByEmail(ctx context.Context, email *string) (*User, error)
 	FindOneByUsername(ctx context.Context, username *string) (*User, error)
@@ -26,7 +29,7 @@ type UserRepository interface {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	// hash user password
-	hashedPassword, err := infra_crypto.HashPassword(u.Password)
+	hashedPassword, err := helper_crypto.HashPassword(u.Password)
 	if err != nil {
 		return err
 	}
@@ -41,7 +44,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		return nil
 	}
 
-	hashedPassword, err := infra_crypto.HashPassword(u.Password)
+	hashedPassword, err := helper_crypto.HashPassword(u.Password)
 	if err != nil {
 		return err
 	}
