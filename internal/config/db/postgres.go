@@ -2,11 +2,11 @@ package db
 
 import (
 	"fmt"
-	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
+	"log"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/config/env"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 var conn *gorm.DB
@@ -26,36 +26,4 @@ func GetPostgresGorm() *gorm.DB {
 	}
 
 	return conn
-}
-
-func Seed() {
-	if conn == nil {
-		StartPostgresGorm()
-	}
-
-	conn.Debug().Model(&domain.User{}).Save(&domain.User{
-		Username: "rama1",
-		Email:    "rama1@gmail.com",
-		Password: "rama1",
-		Age:      22,
-	})
-
-	conn.Debug().Model(&domain.Photo{}).Save(&domain.Photo{
-		Title:    "Profile Picture",
-		Caption:  "vacation",
-		PhotoUrl: "https://rama1",
-		UserId:   1,
-	})
-
-	conn.Debug().Model(&domain.Comment{}).Save(&domain.Comment{
-		Message: "very cool",
-		UserId:  1,
-		PhotoId: 1,
-	})
-
-	conn.Debug().Model(&domain.SocialMedia{}).Save(&domain.SocialMedia{
-		Name:           "Facebook",
-		SocialMediaUrl: "https://facebook.com/rama1",
-		UserId:         1,
-	})
 }

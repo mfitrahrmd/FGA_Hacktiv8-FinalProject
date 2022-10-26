@@ -9,6 +9,15 @@ type Comment struct {
 	PhotoId uint   `json:"photo_id,omitempty"`
 }
 
+type CommentAdd struct {
+	Message string `json:"message" binding:"required"`
+	PhotoId uint   `json:"photo_id" binding:"required"`
+}
+
+type CommentUpdateData struct {
+	Message string `json:"message" binding:"required"`
+}
+
 type CommentWithUserAndPhotoData struct {
 	Comment
 	User  *User  `json:"user,omitempty" gorm:"embedded"`

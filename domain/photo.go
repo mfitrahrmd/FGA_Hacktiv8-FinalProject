@@ -13,6 +13,18 @@ type Photo struct {
 	Comments []Comment `json:"comment,omitempty"`
 }
 
+type PhotoAdd struct {
+	Title    string `json:"title" binding:"required"`
+	Caption  string `json:"caption"`
+	PhotoUrl string `json:"photo_url" binding:"required"`
+}
+
+type PhotoUpdateData struct {
+	Title    string `json:"title" binding:"required"`
+	Caption  string `json:"caption" binding:"required"`
+	PhotoUrl string `json:"photo_url" binding:"required"`
+}
+
 type PhotoWithUserData struct {
 	Photo
 	User *User `json:"user,omitempty" gorm:"embedded"`

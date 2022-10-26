@@ -9,6 +9,16 @@ type SocialMedia struct {
 	UserId         uint   `json:"user_id,omitempty"`
 }
 
+type SocialMediaAdd struct {
+	Name           string `json:"name" binding:"required"`
+	SocialMediaUrl string `json:"social_media_url" binding:"required"`
+}
+
+type SocialMediaUpdateData struct {
+	Name           string `json:"name" binding:"required"`
+	SocialMediaUrl string `json:"social_media_url" binding:"required"`
+}
+
 type SocialMediaWithUserData struct {
 	SocialMedia
 	User *User `json:"user,omitempty" gorm:"embedded"`

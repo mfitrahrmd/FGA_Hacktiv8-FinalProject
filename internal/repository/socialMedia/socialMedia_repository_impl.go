@@ -2,6 +2,7 @@ package socialMedia
 
 import (
 	"context"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -11,7 +12,7 @@ type socialMediaRepository struct {
 	gorm *gorm.DB
 }
 
-func NewSocialMediaRepository(db *gorm.DB) *socialMediaRepository {
+func NewSocialMediaRepository(db *gorm.DB) domain.SocialMediaRepository {
 	return &socialMediaRepository{
 		gorm: db,
 	}
@@ -20,9 +21,19 @@ func NewSocialMediaRepository(db *gorm.DB) *socialMediaRepository {
 func (s socialMediaRepository) FindAllWithUserData(ctx context.Context) (*[]domain.SocialMediaWithUserData, error) {
 	var result []domain.SocialMediaWithUserData
 
-	err := s.gorm.Model(&domain.SocialMedia{}).Select("social_media.*, users.id, users.username").Joins("JOIN users ON social_media.user_id = users.id").Find(&result).Error
+	rows, err := s.gorm.Debug().Raw("SELECT social_media.id, social_media.name, social_media.social_media_url, social_media.user_id, social_media.created_at, social_media.updated_at, users.id, users.username, photos.photo_url FROM social_media JOIN users ON social_media.user_id = users.id LEFT JOIN photos ON users.id = photos.user_id").Rows()
 	if err != nil {
 		return nil, err
+	}
+
+	for rows.Next() {
+		var r domain.SocialMediaWithUserData
+		var u domain.User
+		var p domain.Photo
+		rows.Scan(&r.Id, &r.Name, &r.SocialMediaUrl, &r.UserId, &r.CreatedAt, &r.UpdatedAt, &u.Id, &u.Username, &p.PhotoUrl)
+		r.User = &u
+		r.User.Photo = &p
+		result = append(result, r)
 	}
 
 	return &result, nil

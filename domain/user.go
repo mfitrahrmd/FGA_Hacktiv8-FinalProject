@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/helper/helper_crypto"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,25 @@ type User struct {
 	SocialMedia *SocialMedia `json:"social_media,omitempty"`
 }
 
+type UserRegister struct {
+	Username string `json:"username" binding:"required,uniqueUsername"`
+	Email    string `json:"email" binding:"required,email,uniqueEmail"`
+	Password string `json:"password" binding:"required,min=6"`
+	Age      int    `json:"age" binding:"required,min=8"`
+}
+
+type UserLogin struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type UserUpdateData struct {
+	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
+}
+
 type UserRepository interface {
+	FindAndCount(ctx context.Context, user *User) (*int, error)
 	FindAll(ctx context.Context) (*[]User, error)
 	FindOneById(ctx context.Context, id *uint) (*User, error)
 	FindOneByEmail(ctx context.Context, email *string) (*User, error)
@@ -28,7 +47,6 @@ type UserRepository interface {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
-	// hash user password
 	hashedPassword, err := helper_crypto.HashPassword(u.Password)
 	if err != nil {
 		return err

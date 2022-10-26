@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/config/env"
-	"time"
 )
 
 type TokenPayload struct {
@@ -24,7 +25,7 @@ func GenerateToken(key string, payload any) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		payload,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Millisecond * time.Duration(env.JWT_DURATION)).Unix(),
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(env.JWT_DURATION)).Unix(),
 		},
 	})
 
@@ -45,6 +46,8 @@ func ValidateToken(key string, jwtToken string) (*TokenPayload, error) {
 		return []byte(key), nil
 	})
 	if err != nil {
+		vErr := err.(*jwt.ValidationError)
+		fmt.Println(vErr.Inner)
 		return nil, err
 	}
 

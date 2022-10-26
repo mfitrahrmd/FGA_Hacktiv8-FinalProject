@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -11,10 +12,22 @@ type userRepository struct {
 	gorm *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *userRepository {
+func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &userRepository{
 		gorm: db,
 	}
+}
+
+func (u userRepository) FindAndCount(ctx context.Context, user *domain.User) (*int, error) {
+	var result int64
+	if err := u.gorm.Model(&domain.User{}).Find(user, *user).Count(&result).Error; err != nil {
+		return nil, err
+	}
+
+	var count int
+	count = int(result)
+
+	return &count, nil
 }
 
 func (u userRepository) FindAll(ctx context.Context) (*[]domain.User, error) {
@@ -58,7 +71,7 @@ func (u userRepository) FindOneByUsername(ctx context.Context, username *string)
 }
 
 func (u userRepository) InsertOne(ctx context.Context, user *domain.User) (*domain.User, error) {
-	if err := u.gorm.Model(&domain.User{}).Save(user).Error; err != nil {
+	if err := u.gorm.Model(&domain.User{}).Create(user).Error; err != nil {
 		return nil, err
 	}
 

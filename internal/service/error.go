@@ -1,23 +1,23 @@
 package service
 
-type SERVICE_ERROR string
+import "errors"
 
-const (
-	NOT_FOUND        SERVICE_ERROR = "not found"
-	ACCESS_DENIED    SERVICE_ERROR = "access denied"
-	INVALID_PASSWORD SERVICE_ERROR = "invalid password"
+type ServiceError struct {
+	StatusCode int
+	Err        error
+}
+
+var (
+	NOT_FOUND                       ServiceError = ServiceError{404, errors.New("not found")}
+	ACCESS_DENIED                   ServiceError = ServiceError{403, errors.New("access denied")}
+	INVALID_PASSWORD                ServiceError = ServiceError{401, errors.New("invalid password")}
+	USERNAME_OR_EMAIL_ALREADY_EXIST ServiceError = ServiceError{400, errors.New("username or email already exist")}
+	USER_DOES_NOT_EXIST             ServiceError = ServiceError{404, errors.New("user does not exist")}
+	PHOTO_NOT_FOUND                 ServiceError = ServiceError{404, errors.New("photo not found")}
+	COMMENT_NOT_FOUND               ServiceError = ServiceError{404, errors.New("comment not found")}
+	SOCIAL_MEDIA_NOT_FOUND          ServiceError = ServiceError{404, errors.New("social media not found")}
 )
 
-type serviceError struct {
-	message SERVICE_ERROR
-}
-
-func (s serviceError) Error() string {
-	return string(s.message)
-}
-
-func NewServiceError(message SERVICE_ERROR) serviceError {
-	return serviceError{
-		message: message,
-	}
+func (s ServiceError) Error() string {
+	return s.Err.Error()
 }

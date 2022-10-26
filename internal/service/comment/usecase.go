@@ -3,6 +3,7 @@ package comment
 import (
 	"context"
 	"errors"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service"
 	"gorm.io/gorm"
@@ -35,7 +36,7 @@ func (c commentUsecase) VerifyCommentOwner(ctx context.Context, commentId *uint,
 		return false, err
 	}
 
-	if foundComment.PhotoId != *userId {
+	if foundComment.UserId != *userId {
 		return false, nil
 	}
 
@@ -44,6 +45,14 @@ func (c commentUsecase) VerifyCommentOwner(ctx context.Context, commentId *uint,
 
 func (c commentUsecase) AddComment(ctx context.Context, userId *uint, comment *domain.Comment) (*domain.Comment, error) {
 	comment.UserId = *userId
+
+	_, err := c.photoRepository.FindOneById(ctx, &comment.PhotoId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, service.PHOTO_NOT_FOUND
+		}
+		return nil, err
+	}
 
 	addedComment, err := c.commentRepository.InsertOne(ctx, comment)
 	if err != nil {
@@ -66,7 +75,7 @@ func (c commentUsecase) UpdateComment(ctx context.Context, commentId *uint, user
 	foundComment, err := c.commentRepository.FindOneById(ctx, commentId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.NewServiceError(service.NOT_FOUND)
+			return nil, service.COMMENT_NOT_FOUND
 		}
 
 		return nil, err
@@ -78,7 +87,7 @@ func (c commentUsecase) UpdateComment(ctx context.Context, commentId *uint, user
 	}
 
 	if !isVerified {
-		return nil, service.NewServiceError(service.ACCESS_DENIED)
+		return nil, service.ACCESS_DENIED
 	}
 
 	updatedComment, err := c.commentRepository.UpdateOneById(ctx, commentId, comment)
@@ -93,7 +102,7 @@ func (c commentUsecase) DeleteComment(ctx context.Context, commentId *uint, user
 	foundComment, err := c.commentRepository.FindOneById(ctx, commentId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.NewServiceError(service.NOT_FOUND)
+			return nil, service.COMMENT_NOT_FOUND
 		}
 
 		return nil, err
@@ -105,7 +114,7 @@ func (c commentUsecase) DeleteComment(ctx context.Context, commentId *uint, user
 	}
 
 	if !isVerified {
-		return nil, service.NewServiceError(service.ACCESS_DENIED)
+		return nil, service.ACCESS_DENIED
 	}
 
 	deletedComment, err := c.commentRepository.DeleteOneById(ctx, commentId)

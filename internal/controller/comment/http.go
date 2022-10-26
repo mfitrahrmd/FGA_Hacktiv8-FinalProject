@@ -1,11 +1,13 @@
 package comment
 
 import (
+	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service/comment"
-	"net/http"
-	"strconv"
 )
 
 type CommentController interface {
@@ -17,29 +19,34 @@ type CommentController interface {
 
 type commentHttp struct {
 	commentUsecase comment.CommentUsecase
+	ctx            context.Context
 }
 
-func NewCommentHttp(commentUsecase comment.CommentUsecase) CommentController {
+func NewCommentHttp(ctx context.Context, commentUsecase comment.CommentUsecase) CommentController {
 	return &commentHttp{
 		commentUsecase: commentUsecase,
+		ctx:            ctx,
 	}
 }
 
 func (c commentHttp) PostComment(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
-	var bindComment domain.Comment
+	var bindComment domain.CommentAdd
 
 	err := ctx.ShouldBindJSON(&bindComment)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypeBind)
 
 		return
 	}
 
-	addedComment, err := c.commentUsecase.AddComment(ctx, &userId, &bindComment)
+	addedComment, err := c.commentUsecase.AddComment(c.ctx, &userId, &domain.Comment{
+		Message: bindComment.Message,
+		PhotoId: bindComment.PhotoId,
+	})
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -48,9 +55,9 @@ func (c commentHttp) PostComment(ctx *gin.Context) {
 }
 
 func (c commentHttp) GetAllComments(ctx *gin.Context) {
-	comments, err := c.commentUsecase.GetAllComments(ctx)
+	comments, err := c.commentUsecase.GetAllComments(c.ctx)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -65,18 +72,20 @@ func (c commentHttp) PutComment(ctx *gin.Context) {
 
 	userId := ctx.MustGet("userId").(uint)
 
-	var bindComment domain.Comment
+	var bindComment domain.CommentUpdateData
 
 	err := ctx.ShouldBindJSON(&bindComment)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypeBind)
 
 		return
 	}
 
-	updatedComment, err := c.commentUsecase.UpdateComment(ctx, &commentId, &userId, &bindComment)
+	updatedComment, err := c.commentUsecase.UpdateComment(c.ctx, &commentId, &userId, &domain.Comment{
+		Message: bindComment.Message,
+	})
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -91,9 +100,9 @@ func (c commentHttp) DeleteComment(ctx *gin.Context) {
 
 	userId := ctx.MustGet("userId").(uint)
 
-	_, err := c.commentUsecase.DeleteComment(ctx, &commentId, &userId)
+	_, err := c.commentUsecase.DeleteComment(c.ctx, &commentId, &userId)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}

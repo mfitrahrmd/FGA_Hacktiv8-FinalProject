@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"errors"
+	"net/http"
+	"strings"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/config/env"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/helper/helper_jwt"
-	"net/http"
 )
 
 func Authentication(ctx *gin.Context) {
@@ -25,6 +27,13 @@ func Authentication(ctx *gin.Context) {
 		if errors.Is(err, jwt.ErrInvalidKey) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": "invalid access token",
+			})
+
+			return
+		}
+		if strings.Contains(err.Error(), "token is expired") {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"message": "token has expired",
 			})
 
 			return

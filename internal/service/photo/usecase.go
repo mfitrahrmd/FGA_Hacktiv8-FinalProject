@@ -3,6 +3,7 @@ package photo
 import (
 	"context"
 	"errors"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service"
 	"gorm.io/gorm"
@@ -62,7 +63,7 @@ func (p photoUsecase) UpdatePhoto(ctx context.Context, userId *uint, photoId *ui
 	_, err := p.photoRepository.FindOneById(ctx, photoId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.NewServiceError(service.NOT_FOUND)
+			return nil, service.PHOTO_NOT_FOUND
 		}
 
 		return nil, err
@@ -74,7 +75,7 @@ func (p photoUsecase) UpdatePhoto(ctx context.Context, userId *uint, photoId *ui
 	}
 
 	if !isVerified {
-		return nil, service.NewServiceError(service.ACCESS_DENIED)
+		return nil, service.ACCESS_DENIED
 	}
 
 	updatedPhoto, err := p.photoRepository.UpdateOneById(ctx, photoId, photo)
@@ -89,7 +90,7 @@ func (p photoUsecase) DeletePhoto(ctx context.Context, userId *uint, photoId *ui
 	foundPhoto, err := p.photoRepository.FindOneById(ctx, photoId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, service.NewServiceError(service.NOT_FOUND)
+			return nil, service.PHOTO_NOT_FOUND
 		}
 
 		return nil, err
@@ -101,7 +102,7 @@ func (p photoUsecase) DeletePhoto(ctx context.Context, userId *uint, photoId *ui
 	}
 
 	if !isVerified {
-		return nil, service.NewServiceError(service.ACCESS_DENIED)
+		return nil, service.ACCESS_DENIED
 	}
 
 	deletedPhoto, err := p.photoRepository.DeleteOneById(ctx, photoId)

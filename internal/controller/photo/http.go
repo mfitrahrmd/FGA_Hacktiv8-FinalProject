@@ -1,11 +1,13 @@
 package photo
 
 import (
+	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service/photo"
-	"net/http"
-	"strconv"
 )
 
 type PhotoController interface {
@@ -17,29 +19,35 @@ type PhotoController interface {
 
 type photoHttp struct {
 	photoUsecase photo.PhotoUsecase
+	ctx          context.Context
 }
 
-func NewUserHttp(photoUsecase photo.PhotoUsecase) PhotoController {
+func NewUserHttp(ctx context.Context, photoUsecase photo.PhotoUsecase) PhotoController {
 	return &photoHttp{
 		photoUsecase: photoUsecase,
+		ctx:          ctx,
 	}
 }
 
 func (p photoHttp) PostPhoto(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
-	var bindPhoto domain.Photo
+	var bindPhoto domain.PhotoAdd
 
 	err := ctx.ShouldBindJSON(&bindPhoto)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypeBind)
 
 		return
 	}
 
-	addedPhoto, err := p.photoUsecase.AddPhoto(ctx, &userId, &bindPhoto)
+	addedPhoto, err := p.photoUsecase.AddPhoto(p.ctx, &userId, &domain.Photo{
+		Title:    bindPhoto.Title,
+		Caption:  bindPhoto.Caption,
+		PhotoUrl: bindPhoto.PhotoUrl,
+	})
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -48,9 +56,9 @@ func (p photoHttp) PostPhoto(ctx *gin.Context) {
 }
 
 func (p photoHttp) GetAllPhotos(ctx *gin.Context) {
-	photos, err := p.photoUsecase.GetAllPhotos(ctx)
+	photos, err := p.photoUsecase.GetAllPhotos(p.ctx)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -65,18 +73,22 @@ func (p photoHttp) PutPhoto(ctx *gin.Context) {
 
 	userId := ctx.MustGet("userId").(uint)
 
-	var bindPhoto domain.Photo
+	var bindPhoto domain.PhotoUpdateData
 
 	err := ctx.ShouldBindJSON(&bindPhoto)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypeBind)
 
 		return
 	}
 
-	updatedPhoto, err := p.photoUsecase.UpdatePhoto(ctx, &userId, &photoId, &bindPhoto)
+	updatedPhoto, err := p.photoUsecase.UpdatePhoto(p.ctx, &userId, &photoId, &domain.Photo{
+		Title:    bindPhoto.Title,
+		Caption:  bindPhoto.Caption,
+		PhotoUrl: bindPhoto.PhotoUrl,
+	})
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}
@@ -91,9 +103,9 @@ func (p photoHttp) DeletePhoto(ctx *gin.Context) {
 
 	userId := ctx.MustGet("userId").(uint)
 
-	_, err := p.photoUsecase.DeletePhoto(ctx, &userId, &photoId)
+	_, err := p.photoUsecase.DeletePhoto(p.ctx, &userId, &photoId)
 	if err != nil {
-		ctx.Abort()
+		ctx.Error(err).SetType(gin.ErrorTypePublic)
 
 		return
 	}

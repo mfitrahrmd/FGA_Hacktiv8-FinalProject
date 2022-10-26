@@ -1,11 +1,16 @@
 package env
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
+
+// server variables
+var HOST string = "localhost"
+var PORT string = "8001"
 
 // postgres variables
 var PG_USER string
@@ -24,6 +29,9 @@ func LoadEnvFile() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+
+	HOST = os.Getenv("HOST")
+	PORT = os.Getenv("PORT")
 
 	PG_USER = os.Getenv("PG_USER")
 	PG_PASSWORD = os.Getenv("PG_PASSWORD")

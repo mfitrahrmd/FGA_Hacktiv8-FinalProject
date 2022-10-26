@@ -2,6 +2,7 @@ package photo
 
 import (
 	"context"
+
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -11,7 +12,7 @@ type photoRepository struct {
 	gorm *gorm.DB
 }
 
-func NewPhotoRepository(db *gorm.DB) *photoRepository {
+func NewPhotoRepository(db *gorm.DB) domain.PhotoRepository {
 	return &photoRepository{
 		gorm: db,
 	}
@@ -20,8 +21,18 @@ func NewPhotoRepository(db *gorm.DB) *photoRepository {
 func (p photoRepository) FindAllWithUserData(ctx context.Context) (*[]domain.PhotoWithUserData, error) {
 	var result []domain.PhotoWithUserData
 
-	if err := p.gorm.Model(&domain.Photo{}).Select("photos.*, users.email, users.username").Joins("JOIN users ON photos.user_id = users.id").Find(&result).Error; err != nil {
+	rows, err := p.gorm.Model(&domain.Photo{}).Select("photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.email, users.username").Joins("JOIN users ON photos.user_id = users.id").Rows()
+	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r domain.PhotoWithUserData
+		var user domain.User
+		rows.Scan(&r.Id, &r.Title, &r.Caption, &r.PhotoUrl, &r.UserId, &r.CreatedAt, &r.UpdatedAt, &user.Email, &user.Username)
+		r.User = &user
+		result = append(result, r)
 	}
 
 	return &result, nil
