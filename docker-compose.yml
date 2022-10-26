@@ -1,0 +1,33 @@
+version: '1.1'
+services:
+  app:
+    container_name: go
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - final_project
+    
+  postgresdb:
+    container_name: pg
+    image: postgres:alpine
+    ports:
+      - ${PG_PORT}:${PG_PORT}
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB}
+    networks:
+      - final_project
+    healthcheck:
+      test: ["CMD", "psql", "-U", "dev", "finalproject"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+
+networks:
+  final_project:
+    driver: bridge

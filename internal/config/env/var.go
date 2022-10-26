@@ -9,7 +9,7 @@ import (
 )
 
 // server variables
-var HOST string = "localhost"
+var HOST string = "0.0.0.0"
 var PORT string = "8001"
 
 // postgres variables
@@ -27,7 +27,7 @@ func LoadEnvFile() {
 	wd, _ := os.Getwd()
 	err := godotenv.Load(wd + "/.env")
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Print("error loading .env")
 	}
 
 	HOST = os.Getenv("HOST")
