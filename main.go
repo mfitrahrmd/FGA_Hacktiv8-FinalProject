@@ -132,5 +132,6 @@ func main() {
 		}
 	}
 
+	log.Println("for API documentation : http://127.0.0.1:8001/swagger/index.html")
 	log.Fatalln(r.Run(fmt.Sprintf("%s:%s", env.HOST, env.PORT)))
 }

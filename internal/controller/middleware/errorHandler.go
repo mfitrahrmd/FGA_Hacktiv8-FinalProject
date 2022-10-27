@@ -97,8 +97,8 @@ func ErrorHandler(ctx *gin.Context) {
 			case gin.ErrorTypePublic:
 				var serviceError service.ServiceError
 				if errors.As(err, &serviceError) {
-					ctx.JSON(serviceError.StatusCode, gin.H{
-						"message": serviceError.Error(),
+					ctx.JSON(serviceError.StatusCode, Error{
+						Message: serviceError.Error(),
 					})
 
 					return

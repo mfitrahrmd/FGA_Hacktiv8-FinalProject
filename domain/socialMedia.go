@@ -14,14 +14,32 @@ type SocialMediaAdd struct {
 	SocialMediaUrl string `json:"social_media_url" binding:"required"`
 }
 
+type SocialMediaAddResponse struct {
+	Base
+	Name           string `json:"name"`
+	SocialMediaUrl string `json:"social_media_url"`
+	UserId         uint   `json:"user_id"`
+}
+
 type SocialMediaUpdateData struct {
 	Name           string `json:"name" binding:"required"`
 	SocialMediaUrl string `json:"social_media_url" binding:"required"`
 }
 
+type SocialMediaUpdateDataResponse struct {
+	Base
+	Name           string `json:"name"`
+	SocialMediaUrl string `json:"social_media_url"`
+	UserId         uint   `json:"user_id"`
+}
+
 type SocialMediaWithUserData struct {
 	SocialMedia
 	User *User `json:"user,omitempty" gorm:"embedded"`
+}
+
+type SocialMediaDeleteResponse struct {
+	Message string `json:"message"`
 }
 
 type SocialMediaRepository interface {

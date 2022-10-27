@@ -29,6 +29,17 @@ func NewCommentHttp(ctx context.Context, commentUsecase comment.CommentUsecase) 
 	}
 }
 
+// @Summary Add comment to existing photo
+// @Tags Photo's Comments
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param comment body domain.CommentAdd true "Comment Data"
+// @Success 201 {object} domain.CommentAddResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /comments [post]
 func (c commentHttp) PostComment(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
@@ -54,6 +65,15 @@ func (c commentHttp) PostComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, addedComment)
 }
 
+// @Summary Get all comments
+// @Tags Photo's Comments
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Success 200 {object} domain.CommentWithUserAndPhotoData
+// @Failure 401 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /comments [get]
 func (c commentHttp) GetAllComments(ctx *gin.Context) {
 	comments, err := c.commentUsecase.GetAllComments(c.ctx)
 	if err != nil {
@@ -65,6 +85,19 @@ func (c commentHttp) GetAllComments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, comments)
 }
 
+// @Summary Update existing comment
+// @Tags Photo's Comments
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param commentId path int true "Comment ID"
+// @Param comment body domain.CommentUpdateData true "Comment Data"
+// @Success 200 {object} domain.CommentUpdateDataResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /comments/{commentId} [put]
 func (c commentHttp) PutComment(ctx *gin.Context) {
 	paramCommentId := ctx.Param("commentId")
 	conv, _ := strconv.ParseUint(paramCommentId, 10, 64)
@@ -93,6 +126,16 @@ func (c commentHttp) PutComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updatedComment)
 }
 
+// @Summary Delete existing comment
+// @Tags Photo's Comments
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param commentId path int true "Comment ID"
+// @Success 200 {object} domain.CommentDeleteResponse
+// @Failure 401 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /comments/{commentId} [delete]
 func (c commentHttp) DeleteComment(ctx *gin.Context) {
 	paramPhotoId := ctx.Param("commentId")
 	conv, _ := strconv.ParseUint(paramPhotoId, 10, 64)

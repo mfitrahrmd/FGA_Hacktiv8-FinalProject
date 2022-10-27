@@ -30,12 +30,15 @@ func NewUserHttp(ctx context.Context, photoUsecase photo.PhotoUsecase) PhotoCont
 }
 
 // @Summary Add a new user photo
+// @Tags Photos
 // @Accept json
 // @Produce json
-// @Param user body domain.PhotoAdd true "Photo Data"
+// @Param Authorization header string true "Access Token"
+// @Param photo body domain.PhotoAdd true "Photo Data"
 // @Success 201 {object} domain.PhotoAddResponse
 // @Failure 400 {object} middleware.Error
 // @Failure 401 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
 // @Router /photos [post]
 func (p photoHttp) PostPhoto(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
@@ -64,11 +67,12 @@ func (p photoHttp) PostPhoto(ctx *gin.Context) {
 }
 
 // @Summary Get all photos
+// @Tags Photos
 // @Produce json
+// @Param Authorization header string true "Access Token"
 // @Success 200 {object} domain.PhotoWithUserData
-// @Failure 400 {object} middleware.Error
 // @Failure 401 {object} middleware.Error
-// @Failure 403 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
 // @Router /photos [get]
 func (p photoHttp) GetAllPhotos(ctx *gin.Context) {
 	photos, err := p.photoUsecase.GetAllPhotos(p.ctx)
@@ -82,14 +86,18 @@ func (p photoHttp) GetAllPhotos(ctx *gin.Context) {
 }
 
 // @Summary Update existing photo
+// @Tags Photos
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Access Token"
 // @Param photoId path int true "Photo ID"
-// @Param user body domain.PhotoUpdateData true "Photo Data"
+// @Param photo body domain.PhotoUpdateData true "Photo Data"
 // @Success 200 {object} domain.PhotoUpdateDataResponse
 // @Failure 400 {object} middleware.Error
 // @Failure 401 {object} middleware.Error
 // @Failure 403 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
 // @Router /photos/{photoId} [put]
 func (p photoHttp) PutPhoto(ctx *gin.Context) {
 	paramPhotoId := ctx.Param("photoId")
@@ -123,10 +131,14 @@ func (p photoHttp) PutPhoto(ctx *gin.Context) {
 
 // @Summary Delete existing photo
 // @Produce json
+// @Tags Photos
+// @Param Authorization header string true "Access Token"
 // @Param photoId path int true "Photo ID"
 // @Success 200 {object} domain.PhotoDeleteResponse
 // @Failure 401 {object} middleware.Error
 // @Failure 403 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
 // @Router /photos/{photoId} [delete]
 func (p photoHttp) DeletePhoto(ctx *gin.Context) {
 	paramPhotoId := ctx.Param("photoId")

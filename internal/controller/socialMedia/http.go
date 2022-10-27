@@ -29,6 +29,17 @@ func NewSocialMediaController(ctx context.Context, socialMediaUsecase socialMedi
 	}
 }
 
+// @Summary Add user's social media
+// @Tags User's Social Media
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param photo body domain.SocialMediaAdd true "Social Media Data"
+// @Success 201 {object} domain.SocialMediaAddResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /socialmedias [post]
 func (s socialMediaController) PostSocialMedia(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
@@ -54,6 +65,14 @@ func (s socialMediaController) PostSocialMedia(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, addedSocialMedia)
 }
 
+// @Summary Get all social medias
+// @Tags User's Social Media
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Success 200 {object} domain.SocialMediaWithUserData
+// @Failure 401 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /socialmedias [get]
 func (s socialMediaController) GetAllSocialMedias(ctx *gin.Context) {
 	socialMedias, err := s.socialMediaUsecase.GetAllSocialMedias(s.ctx)
 	if err != nil {
@@ -65,6 +84,19 @@ func (s socialMediaController) GetAllSocialMedias(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, socialMedias)
 }
 
+// @Summary Update existing user's social media
+// @Tags User's Social Media
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param socialMediaId path int true "Social Media ID"
+// @Param photo body domain.SocialMediaUpdateData true "Social Media Data"
+// @Success 200 {object} domain.SocialMediaUpdateDataResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /socialmedias/{socialMediaId} [put]
 func (s socialMediaController) PutSocialMedia(ctx *gin.Context) {
 	paramSocialMediaId := ctx.Param("socialMediaId")
 	conv, _ := strconv.ParseUint(paramSocialMediaId, 10, 64)
@@ -94,6 +126,16 @@ func (s socialMediaController) PutSocialMedia(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updatedSocialMedia)
 }
 
+// @Summary Delete existing user's social media
+// @Tags User's Social Media
+// @Produce json
+// @Param Authorization header string true "Access Token"
+// @Param socialMediaId path int true "Social Media ID"
+// @Success 200 {object} domain.SocialMediaUpdateDataResponse
+// @Failure 401 {object} middleware.Error
+// @Failure 404 {object} middleware.Error
+// @Failure 500 {object} middleware.Error
+// @Router /socialmedias/{socialMediaId} [delete]
 func (s socialMediaController) DeleteSocialMedia(ctx *gin.Context) {
 	paramSocialMediaId := ctx.Param("socialMediaId")
 	conv, _ := strconv.ParseUint(paramSocialMediaId, 10, 64)

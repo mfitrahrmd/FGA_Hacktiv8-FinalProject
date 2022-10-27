@@ -14,14 +14,30 @@ type CommentAdd struct {
 	PhotoId uint   `json:"photo_id" binding:"required"`
 }
 
+type CommentAddResponse struct {
+	Base
+	Message string `json:"message"`
+	PhotoId uint   `json:"photo_id"`
+}
+
 type CommentUpdateData struct {
 	Message string `json:"message" binding:"required"`
+}
+
+type CommentUpdateDataResponse struct {
+	Base
+	Message string `json:"message"`
+	PhotoId uint   `json:"photo_id"`
 }
 
 type CommentWithUserAndPhotoData struct {
 	Comment
 	User  *User  `json:"user,omitempty" gorm:"embedded"`
 	Photo *Photo `json:"photo,omitempty" gorm:"embedded"`
+}
+
+type CommentDeleteResponse struct {
+	Message string `json:"message"`
 }
 
 type CommentRepository interface {

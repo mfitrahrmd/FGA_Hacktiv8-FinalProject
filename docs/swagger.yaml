@@ -15,6 +15,73 @@ definitions:
       user_id:
         type: integer
     type: object
+  domain.CommentAdd:
+    properties:
+      message:
+        type: string
+      photo_id:
+        type: integer
+    required:
+    - message
+    - photo_id
+    type: object
+  domain.CommentAddResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      photo_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.CommentDeleteResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  domain.CommentUpdateData:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  domain.CommentUpdateDataResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      photo_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.CommentWithUserAndPhotoData:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      photo:
+        $ref: '#/definitions/domain.Photo'
+      photo_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: integer
+    type: object
   domain.Photo:
     properties:
       caption:
@@ -134,6 +201,73 @@ definitions:
       user_id:
         type: integer
     type: object
+  domain.SocialMediaAdd:
+    properties:
+      name:
+        type: string
+      social_media_url:
+        type: string
+    required:
+    - name
+    - social_media_url
+    type: object
+  domain.SocialMediaAddResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      social_media_url:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.SocialMediaUpdateData:
+    properties:
+      name:
+        type: string
+      social_media_url:
+        type: string
+    required:
+    - name
+    - social_media_url
+    type: object
+  domain.SocialMediaUpdateDataResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      social_media_url:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.SocialMediaWithUserData:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      social_media_url:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: integer
+    type: object
   domain.User:
     properties:
       age:
@@ -245,15 +379,56 @@ info:
   title: Photos & Social Meida Management API
   version: "1.0"
 paths:
-  /photos:
+  /comments:
     get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.PhotoWithUserData'
+            $ref: '#/definitions/domain.CommentWithUserAndPhotoData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Get all comments
+      tags:
+      - Photo's Comments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Comment Data
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentAdd'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.CommentAddResponse'
         "400":
           description: Bad Request
           schema:
@@ -262,18 +437,132 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/middleware.Error'
-        "403":
-          description: Forbidden
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Add comment to existing photo
+      tags:
+      - Photo's Comments
+  /comments/{commentId}:
+    delete:
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Comment ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CommentDeleteResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Delete existing comment
+      tags:
+      - Photo's Comments
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Comment ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      - description: Comment Data
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentUpdateData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CommentUpdateDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Update existing comment
+      tags:
+      - Photo's Comments
+  /photos:
+    get:
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PhotoWithUserData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.Error'
       summary: Get all photos
+      tags:
+      - Photos
     post:
       consumes:
       - application/json
       parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Photo Data
         in: body
-        name: user
+        name: photo
         required: true
         schema:
           $ref: '#/definitions/domain.PhotoAdd'
@@ -292,10 +581,21 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Add a new user photo
+      tags:
+      - Photos
   /photos/{photoId}:
     delete:
       parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Photo ID
         in: path
         name: photoId
@@ -316,11 +616,26 @@ paths:
           description: Forbidden
           schema:
             $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Delete existing photo
+      tags:
+      - Photos
     put:
       consumes:
       - application/json
       parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Photo ID
         in: path
         name: photoId
@@ -328,7 +643,7 @@ paths:
         type: integer
       - description: Photo Data
         in: body
-        name: user
+        name: photo
         required: true
         schema:
           $ref: '#/definitions/domain.PhotoUpdateData'
@@ -351,9 +666,169 @@ paths:
           description: Forbidden
           schema:
             $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Update existing photo
+      tags:
+      - Photos
+  /socialmedias:
+    get:
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.SocialMediaWithUserData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Get all social medias
+      tags:
+      - User's Social Media
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Social Media Data
+        in: body
+        name: photo
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SocialMediaAdd'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.SocialMediaAddResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Add user's social media
+      tags:
+      - User's Social Media
+  /socialmedias/{socialMediaId}:
+    delete:
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Social Media ID
+        in: path
+        name: socialMediaId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.SocialMediaUpdateDataResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Delete existing user's social media
+      tags:
+      - User's Social Media
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Social Media ID
+        in: path
+        name: socialMediaId
+        required: true
+        type: integer
+      - description: Social Media Data
+        in: body
+        name: photo
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SocialMediaUpdateData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.SocialMediaUpdateDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Update existing user's social media
+      tags:
+      - User's Social Media
   /users:
     delete:
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -365,7 +840,13 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Delete existing user account
+      tags:
+      - Users
     put:
       consumes:
       - application/json
@@ -396,7 +877,13 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Update user account data
+      tags:
+      - Users
   /users/login:
     post:
       consumes:
@@ -419,7 +906,13 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Login with existing user account
+      tags:
+      - Users
   /users/register:
     post:
       consumes:
@@ -442,5 +935,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.Error'
       summary: Register a new user account
+      tags:
+      - Users
 swagger: "2.0"
