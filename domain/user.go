@@ -25,14 +25,33 @@ type UserRegister struct {
 	Age      int    `json:"age" binding:"required,min=8"`
 }
 
+type UserRegisterResponse struct {
+	Base
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
 type UserLogin struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
+type UserLoginResponse struct {
+	Token string `json:"token"`
+}
+
 type UserUpdateData struct {
 	Email    string `json:"email" binding:"required,email"`
 	Username string `json:"username" binding:"required"`
+}
+
+type UserUpdateDataResponse struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+}
+
+type UserDeleteResponse struct {
+	Message string `json:"message"`
 }
 
 type UserRepository interface {

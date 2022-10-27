@@ -19,10 +19,28 @@ type PhotoAdd struct {
 	PhotoUrl string `json:"photo_url" binding:"required"`
 }
 
+type PhotoAddResponse struct {
+	Base
+	Title    string `json:"title"`
+	Caption  string `json:"caption"`
+	PhotoUrl string `json:"photo_url"`
+}
+
 type PhotoUpdateData struct {
 	Title    string `json:"title" binding:"required"`
 	Caption  string `json:"caption" binding:"required"`
 	PhotoUrl string `json:"photo_url" binding:"required"`
+}
+
+type PhotoUpdateDataResponse struct {
+	Base
+	Title    string `json:"title"`
+	Caption  string `json:"caption"`
+	PhotoUrl string `json:"photo_url"`
+}
+
+type PhotoDeleteResponse struct {
+	Message string `json:"message"`
 }
 
 type PhotoWithUserData struct {

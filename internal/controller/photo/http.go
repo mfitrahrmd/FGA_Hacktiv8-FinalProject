@@ -29,6 +29,14 @@ func NewUserHttp(ctx context.Context, photoUsecase photo.PhotoUsecase) PhotoCont
 	}
 }
 
+// @Summary Add a new user photo
+// @Accept json
+// @Produce json
+// @Param user body domain.PhotoAdd true "Photo Data"
+// @Success 201 {object} domain.PhotoAddResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Router /photos [post]
 func (p photoHttp) PostPhoto(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
@@ -55,6 +63,13 @@ func (p photoHttp) PostPhoto(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, addedPhoto)
 }
 
+// @Summary Get all photos
+// @Produce json
+// @Success 200 {object} domain.PhotoWithUserData
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 403 {object} middleware.Error
+// @Router /photos [get]
 func (p photoHttp) GetAllPhotos(ctx *gin.Context) {
 	photos, err := p.photoUsecase.GetAllPhotos(p.ctx)
 	if err != nil {
@@ -66,6 +81,16 @@ func (p photoHttp) GetAllPhotos(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, photos)
 }
 
+// @Summary Update existing photo
+// @Accept json
+// @Produce json
+// @Param photoId path int true "Photo ID"
+// @Param user body domain.PhotoUpdateData true "Photo Data"
+// @Success 200 {object} domain.PhotoUpdateDataResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Failure 403 {object} middleware.Error
+// @Router /photos/{photoId} [put]
 func (p photoHttp) PutPhoto(ctx *gin.Context) {
 	paramPhotoId := ctx.Param("photoId")
 	conv, _ := strconv.ParseUint(paramPhotoId, 10, 64)
@@ -96,6 +121,13 @@ func (p photoHttp) PutPhoto(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updatedPhoto)
 }
 
+// @Summary Delete existing photo
+// @Produce json
+// @Param photoId path int true "Photo ID"
+// @Success 200 {object} domain.PhotoDeleteResponse
+// @Failure 401 {object} middleware.Error
+// @Failure 403 {object} middleware.Error
+// @Router /photos/{photoId} [delete]
 func (p photoHttp) DeletePhoto(ctx *gin.Context) {
 	paramPhotoId := ctx.Param("photoId")
 	conv, _ := strconv.ParseUint(paramPhotoId, 10, 64)

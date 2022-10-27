@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	docs "github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/docs"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/domain"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/config/db"
 	"github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/config/env"
@@ -21,10 +24,26 @@ import (
 	photoUsecase "github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service/photo"
 	socialMediaUsecase "github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service/socialMedia"
 	userUsecase "github.com/mfitrahrmd420/FGA_Hacktiv8-FinalProject/internal/service/user"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Photos & Social Meida Management API
+// @version 1.0
+// @description This is a sample gin server for managing user's photos and social medias with Authentication & Authorization.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8001
+// @BasePath /
 func main() {
-	// load env file into config
+	// load env file
 	env.LoadEnvFile()
 
 	ctx := context.Background()
@@ -49,8 +68,21 @@ func main() {
 
 	r := gin.Default()
 
+	// swagger API documentation route
+	// http://127.0.0.1:8001/swagger/index.html
+	docs.SwaggerInfo.BasePath = "/"
+	ginSwagger.DefaultModelsExpandDepth(1)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// add custom tag struct validation
 	middlewareController.RegisterCustomValidation(ctx, ur)
+
+	// gin cors
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"POST", "GET", "PUT", "DELETE"},
+		AllowHeaders:    []string{"*"},
+	}))
 
 	// passing all errors to error middleware
 	r.Use(middlewareController.ErrorHandler)
@@ -100,5 +132,5 @@ func main() {
 		}
 	}
 
-	r.Run(fmt.Sprintf("%s:%s", env.HOST, env.PORT))
+	log.Fatalln(r.Run(fmt.Sprintf("%s:%s", env.HOST, env.PORT)))
 }

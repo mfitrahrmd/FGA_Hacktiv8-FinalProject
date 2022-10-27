@@ -28,6 +28,13 @@ func NewUserHttp(ctx context.Context, userUsecase user.UserUsecase) UserControll
 	}
 }
 
+// @Summary Register a new user account
+// @Accept json
+// @Produce json
+// @Param user body domain.UserRegister true "User Data"
+// @Success 201 {object} domain.UserRegisterResponse
+// @Failure 400 {object} middleware.Error
+// @Router /users/register [post]
 func (u userHttp) PostUserRegister(ctx *gin.Context) {
 	var bindUser domain.UserRegister
 
@@ -54,6 +61,13 @@ func (u userHttp) PostUserRegister(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, registeredUser)
 }
 
+// @Summary Login with existing user account
+// @Accept  json
+// @Produce  json
+// @Param user body domain.UserLogin true "User Data"
+// @Success 200 {object} domain.UserLoginResponse
+// @Failure 400 {object} middleware.Error
+// @Router /users/login [post]
 func (u userHttp) PostUserLogin(ctx *gin.Context) {
 	var bindUser domain.UserLogin
 
@@ -79,6 +93,15 @@ func (u userHttp) PostUserLogin(ctx *gin.Context) {
 	})
 }
 
+// @Summary Update user account data
+// @Accept  json
+// @Produce  json
+// @Param Authorization header string true "Access Token"
+// @Param user body domain.UserUpdateData true "User Data"
+// @Success 200 {object} domain.UserUpdateDataResponse
+// @Failure 400 {object} middleware.Error
+// @Failure 401 {object} middleware.Error
+// @Router /users [put]
 func (u userHttp) PutUserUpdateData(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 
@@ -106,6 +129,11 @@ func (u userHttp) PutUserUpdateData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updatedUser)
 }
 
+// @Summary Delete existing user account
+// @Produce  json
+// @Success 200 {object} domain.UserDeleteResponse
+// @Failure 401 {object} middleware.Error
+// @Router /users [delete]
 func (u userHttp) DeleteUser(ctx *gin.Context) {
 	userId := ctx.MustGet("userId").(uint)
 

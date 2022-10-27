@@ -1,0 +1,446 @@
+basePath: /
+definitions:
+  domain.Comment:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      photo_id:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.Photo:
+    properties:
+      caption:
+        type: string
+      comment:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.PhotoAdd:
+    properties:
+      caption:
+        type: string
+      photo_url:
+        type: string
+      title:
+        type: string
+    required:
+    - photo_url
+    - title
+    type: object
+  domain.PhotoAddResponse:
+    properties:
+      caption:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.PhotoDeleteResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  domain.PhotoUpdateData:
+    properties:
+      caption:
+        type: string
+      photo_url:
+        type: string
+      title:
+        type: string
+    required:
+    - caption
+    - photo_url
+    - title
+    type: object
+  domain.PhotoUpdateDataResponse:
+    properties:
+      caption:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.PhotoWithUserData:
+    properties:
+      caption:
+        type: string
+      comment:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: integer
+    type: object
+  domain.SocialMedia:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      social_media_url:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      age:
+        type: integer
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      photo:
+        $ref: '#/definitions/domain.Photo'
+      social_media:
+        $ref: '#/definitions/domain.SocialMedia'
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.UserDeleteResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  domain.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.UserLoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  domain.UserRegister:
+    properties:
+      age:
+        minimum: 8
+        type: integer
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - age
+    - email
+    - password
+    - username
+    type: object
+  domain.UserRegisterResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.UserUpdateData:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - username
+    type: object
+  domain.UserUpdateDataResponse:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    type: object
+  middleware.Error:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8001
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample gin server for managing user's photos and social medias
+    with Authentication & Authorization.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Photos & Social Meida Management API
+  version: "1.0"
+paths:
+  /photos:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PhotoWithUserData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Get all photos
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Photo Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PhotoAdd'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.PhotoAddResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Add a new user photo
+  /photos/{photoId}:
+    delete:
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photoId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PhotoDeleteResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Delete existing photo
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photoId
+        required: true
+        type: integer
+      - description: Photo Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PhotoUpdateData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PhotoUpdateDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Update existing photo
+  /users:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserDeleteResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Delete existing user account
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Access Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserUpdateData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserUpdateDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Update user account data
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Login with existing user account
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserRegister'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.UserRegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.Error'
+      summary: Register a new user account
+swagger: "2.0"

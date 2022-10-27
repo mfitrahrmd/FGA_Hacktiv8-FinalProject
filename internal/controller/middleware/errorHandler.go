@@ -12,8 +12,7 @@ import (
 )
 
 type Error struct {
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
+	Message string `json:"message"`
 }
 
 func (e Error) Error() string {
@@ -22,8 +21,7 @@ func (e Error) Error() string {
 
 func NewError(statusCode int, message string) Error {
 	return Error{
-		StatusCode: statusCode,
-		Message:    message,
+		Message: message,
 	}
 }
 
@@ -70,9 +68,8 @@ func ErrorHandler(ctx *gin.Context) {
 				errMap := make(map[string]string)
 				errs, ok := err.Err.(validator.ValidationErrors)
 				if !ok {
-					log.Println(err)
-					ctx.JSON(http.StatusBadRequest, gin.H{
-						"message": "request body should be valid JSON",
+					ctx.JSON(http.StatusBadRequest, Error{
+						Message: "request body should be valid JSON",
 					})
 
 					return
@@ -81,8 +78,19 @@ func ErrorHandler(ctx *gin.Context) {
 					errMap[fieldErr.Field()] = customValidationError(fieldErr)
 				}
 
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": errMap,
+				ctx.JSON(http.StatusBadRequest, Error{
+					Message: func() string {
+						var msg string
+						for _, e := range errMap {
+							if msg == "" {
+								msg = e
+								continue
+							}
+							msg = fmt.Sprintf("%s %s", msg, e)
+						}
+
+						return msg
+					}(),
 				})
 
 				return
