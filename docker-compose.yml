@@ -22,8 +22,6 @@ services:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
       - POSTGRES_DB=${PG_DB}
-    volumes:
-      - final_project-pg_data:/var/lib/postgresql/data
     networks:
       - final_project
     healthcheck:
